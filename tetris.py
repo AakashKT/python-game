@@ -1,5 +1,12 @@
 import pygame, sys, os, random, math
 
+class BlockGroup(pygame.sprite.Sprite):
+
+	def __init__(self, surf):
+		pygame.sprite.Sprite.__init__(self);
+		self.image = surf;
+		self.rect = self.image.get_rect();
+
 class Resources:
 
 	board_width, board_height = 20, 22;
@@ -110,10 +117,12 @@ class Board:
 			for j in range(0, Resources.board_width):
 				self.display[i][j] = 1;
 
-	def add_block(self, block):
+	def add_block(self, block, blocksprite):
 		self.block = block;
+		self.blocksprite = blocksprite;
 
 	def delete_row(self, r):
+		global block_group_sprite;
 		zero = [];
 
 		new_surface = pygame.Surface((30*Resources.board_width, 30*(r+1)));
@@ -137,9 +146,11 @@ class Board:
 				color = self.screen.get_at((j, i));
 				new_surface.set_at((j, i+30), color);
 
-		new_surface = new_surface.convert_alpha();
+		self.blocksprite.empty();
 
-		self.screen.blit(new_surface, (0, 0));
+		new_surface = new_surface.convert_alpha();
+		block_group_sprite = pygame.sprite.RenderUpdates(BlockGroup(new_surface));
+		block_group_sprite.draw(self.screen);
 
 	def check_rotate(self):
 		one = self.block.one;
@@ -222,7 +233,7 @@ class Board:
 		three = self.block.three;
 		four = self.block.four;
 
-		if(one["x"]+1 >= Resources.board_width or two["x"]-1 >= Resources.board_width or two["x"]-1 >= Resources.board_width or two["x"]-1 >= Resources.board_width):
+		if(one["x"]+1 >= Resources.board_width or two["x"]+1 >= Resources.board_width or three["x"]+1 >= Resources.board_width or four["x"]+1 >= Resources.board_width):
 			return True;
 
 		if(self.display[one["y"]][one["x"]+1] == 0 and self.display[two["y"]][two["x"]+1] == 0 and self.display[three["y"]][three["x"]+1] == 0 and self.display[four["y"]][four["x"]+1] == 0):
@@ -277,7 +288,7 @@ class Board:
 
 			self.min = min(one["y"], two["y"], three["y"], four["y"]);
 
-			if(self.min == 0):
+			if(self.min <= 0):
 				self.block.gplay.lost();
 
 			self.row[one["y"]] = self.row[one["y"]] + 1;
@@ -590,16 +601,17 @@ def main():
 	block = Resources.get_block(gplay);
 	blocksprite = pygame.sprite.Group(block);
 
-	board.add_block(block);
+	global block_group_sprite;
+	block_group = BlockGroup(pygame.Surface((0, 0)));
+	block_group_sprite = pygame.sprite.RenderUpdates(block_group);
+
+	board.add_block(block, blocksprite);
 	board.add_ground();
 
 	pygame.display.update();
 
 	clock = pygame.time.Clock();
 	frames = 1;
-
-	global collide_group 
-	collide_group = pygame.sprite.Group(board.ground);
 
 	while(1):
 		clock.tick(60);
@@ -618,10 +630,12 @@ def main():
 				elif event.key == pygame.K_DOWN:
 					block.move_to_bottom(screen, board, blocksprite);
 
-					block = Resources.get_block(gplay);
-					board.add_block(block);
+					block_group_sprite.draw(screen);
 
-					blocksprite = pygame.sprite.Group(block);
+					block = Resources.get_block(gplay);
+					blocksprite.add(block);
+
+					board.add_block(block, blocksprite);
 
 					frames = 1;
 				elif event.key == pygame.K_r:
@@ -630,11 +644,13 @@ def main():
 		if(frames >= 30):
 			if block.move_down(screen, board, blocksprite) == False:
 				block = Resources.get_block(gplay);
-				board.add_block(block);
+				blocksprite.add(block);
 
-				blocksprite = pygame.sprite.Group(block);
+				board.add_block(block, blocksprite);
 
 			frames = 1;
+
+		block_group_sprite.draw(screen);
 
 		blocksprite.draw(screen);
 		board.groundsprite.draw(screen);
