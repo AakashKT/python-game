@@ -6,10 +6,10 @@ class Screen:
 		self.height = height;
 
 		self.displayMatrix = [];
-		self.hasBounds = False;
+		self.drawBounds();
 
 
-	def updateScreen(self):
+	def update(self):
 		for i in range(self.height):
 			for j in range(self.width):
 				print(self.displayMatrix[i][j], end=' ');
@@ -40,9 +40,6 @@ class Screen:
 
 
 	def drawObject(self, obj, x, y):
-		if(self.hasBounds==False):
-			self.displayMatrix[y-1][x-1] = obj;
-		else:
-			self.displayMatrix[y][x] = obj;
+		self.displayMatrix[y-1][x-1] = obj;
 
 

@@ -1,4 +1,6 @@
-import pygame, sys, os
+import pygame
+import sys
+import os
 
 class Block:
 
@@ -66,17 +68,3 @@ class Gameplay():
 
 		self.screen.blit(self.block, self.block_rect);
 		pygame.display.flip();
-
-
-gameplay = game.Gameplay(30*20, 32*20, (255, 255, 255));
-
-gameplay.create_board();
-gameplay.create_block(15*20, 1);
-
-while(1):
-
-	for event in pygame.event.get():
-		if event.type == pygame.QUIT:
-			sys.exit();
-
-	gameplay.update_screen();
