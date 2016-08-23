@@ -1,6 +1,47 @@
-import pygame, sys, os, random
+import pygame, sys, os, random, math
 
 class Resources:
+
+	board_width, board_height = 20, 22;
+	loaded_images = {};
+
+	@staticmethod
+	def init():
+		block_I = Resources.load_image("block-I.png");
+		block_IR = Resources.load_image("block-IR.png");
+
+		block_Z = Resources.load_image("block-Z.png");
+		block_ZR = Resources.load_image("block-ZR.png");
+
+		block_O = Resources.load_image("block-O.png");
+		block_OR = Resources.load_image("block-OR.png");
+
+		block_L = Resources.load_image("block-L.png");
+		block_LR = Resources.load_image("block-LR.png");
+		block_LRR = pygame.transform.flip(block_L[0], True, True);
+		block_LRR = (block_LRR, block_LRR.get_rect());
+		block_LRRR = Resources.load_image("block-LRRR.png");
+
+		ground = Resources.load_image("ground.png");
+
+		Resources.loaded_images = {
+			"ground.png":ground,
+			"block-I.png":block_I,
+			"block-IR.png":block_IR,
+			"block-Z.png":block_Z,
+			"block-ZR.png":block_ZR,
+			"block-O.png":block_O,
+			"block-OR.png":block_OR,
+			"block-L.png":block_L,
+			"block-LR.png":block_LR,
+			"block-LRR.png":block_LRR,
+			"block-LRRR.png":block_LRRR
+		};
+
+	@staticmethod
+	def get_image(name):
+
+		return Resources.loaded_images[name];
 
 	@staticmethod
 	def load_image(name):
@@ -13,20 +54,20 @@ class Resources:
 		return image, image.get_rect();
 
 	@staticmethod
-	def get_block():
-		r = random.choice((1, 2, 3));
+	def get_block(gplay):
+		r = random.choice((1, 2, 3, 4));
 
 		if r == 1:
-			temp = BlockI();
+			temp = BlockI(gplay);
 			return temp;
 		elif r == 2:
-			temp = BlockZ();
+			temp = BlockZ(gplay);
 			return temp;
 		elif r == 3:
-			temp = BlockO();
+			temp = BlockO(gplay);
 			return temp;
 		elif r == 4:
-			temp = BlockL();
+			temp = BlockL(gplay);
 			return temp;
 
 class Ground(pygame.sprite.Sprite):
@@ -35,21 +76,21 @@ class Ground(pygame.sprite.Sprite):
 
 		pygame.sprite.Sprite.__init__(self);
 
-		self.image, self.rect = Resources.load_image(image);
-		self.rect.centery = self.rect.y + 30*21;
+		self.image, self.rect = Resources.get_image(image);
+		self.rect.centery = self.rect.y + 30*(Resources.board_height-1);
 
 class Board:
 
 	def __init__(self, ground_image, background_color, screen):
 		self.screen = screen;
-		self.min = 19;
+		self.min = Resources.board_height-2;
 
 		self.display = [];
 		self.row = [];
 		width, height = screen.get_size();
 
 		self.background = pygame.Surface((width, height));
-		self.background = self.background.convert();
+		self.background = self.background.convert_alpha();
 		self.background.fill(background_color);
 
 		self.ground = Ground(ground_image);
@@ -57,16 +98,16 @@ class Board:
 
 		screen.blit(self.background, (0, 0));
 
-		for i in range(0, 22):
+		for i in range(0, Resources.board_height):
 			temp = [];
 			self.row.append(0);
-			for j in range(0, 20):
+			for j in range(0, Resources.board_width):
 				temp.append(0);
 			self.display.append(temp);
 
 	def add_ground(self):
-		for i in range(20, 22):
-			for j in range(0, 20):
+		for i in range(20, Resources.board_height):
+			for j in range(0, Resources.board_width):
 				self.display[i][j] = 1;
 
 	def add_block(self, block):
@@ -75,14 +116,15 @@ class Board:
 	def delete_row(self, r):
 		zero = [];
 
-		new_surface = pygame.Surface((30*20, 30*(r+1)));
+		new_surface = pygame.Surface((30*Resources.board_width, 30*(r+1)));
 		new_surface.fill(pygame.Color(255, 255, 255, 255));
+		new_surface = new_surface.convert_alpha();
 
 		del self.row[r];
 		self.row.insert(0, 0);
 
 		del self.display[r];
-		for i in range(0, 20):
+		for i in range(0, Resources.board_width):
 			zero.append(0);
 
 		self.display.insert(0, zero);
@@ -91,9 +133,11 @@ class Board:
 
 		for i in range(self.min, 30*(r)+1):
 
-			for j in range(0, 30*20):
+			for j in range(0, 30*(Resources.board_width)):
 				color = self.screen.get_at((j, i));
 				new_surface.set_at((j, i+30), color);
+
+		new_surface = new_surface.convert_alpha();
 
 		self.screen.blit(new_surface, (0, 0));
 
@@ -164,10 +208,9 @@ class Board:
 				else:
 					return True;
 			else:
-				if(self.display[one["y"]][one["x"]+1] == 0 and self.display[two["y"]+1][two["x"]] == 0 and self.display[three["y"]][three["x"]+1] == 0 and self.display[four["y"]+1][four["x"]-2] == 0):
+				if(self.display[one["y"]][one["x"]+1] == 0 and self.display[three["y"]+1][three["x"]+1] == 0 and self.display[four["y"]+1][four["x"]-2] == 0):
 					one["x"], one["y"] = one["x"] + 1, one["y"];
-					two["x"], two["y"] = two["x"], two["y"] + 1;
-					three["x"], three["y"] = three["x"] + 1, three["y"];
+					three["x"], three["y"] = three["x"] + 1, three["y"]+1;
 					four["x"], four["y"] = four["x"] - 2, four["y"] + 1;
 					return False;
 				else:
@@ -178,6 +221,9 @@ class Board:
 		two = self.block.two;
 		three = self.block.three;
 		four = self.block.four;
+
+		if(one["x"]+1 >= Resources.board_width or two["x"]-1 >= Resources.board_width or two["x"]-1 >= Resources.board_width or two["x"]-1 >= Resources.board_width):
+			return True;
 
 		if(self.display[one["y"]][one["x"]+1] == 0 and self.display[two["y"]][two["x"]+1] == 0 and self.display[three["y"]][three["x"]+1] == 0 and self.display[four["y"]][four["x"]+1] == 0):
 			one["x"] = one["x"] + 1;
@@ -194,6 +240,9 @@ class Board:
 		two = self.block.two;
 		three = self.block.three;
 		four = self.block.four;
+
+		if(one["x"]-1 < 0 or two["x"]-1 < 0 or three["x"]-1 < 0 or four["x"]-1 < 0):
+			return True;
 
 		if(self.display[one["y"]][one["x"]-1] == 0 and self.display[two["y"]][two["x"]-1] == 0 and self.display[three["y"]][three["x"]-1] == 0 and self.display[four["y"]][four["x"]-1] == 0):
 			one["x"] = one["x"] - 1;
@@ -220,12 +269,16 @@ class Board:
 			return False;
 		else:
 			print("Commit");
+
 			self.display[one["y"]][one["x"]] = 1;
 			self.display[two["y"]][two["x"]] = 1;
 			self.display[three["y"]][three["x"]] = 1;
 			self.display[four["y"]][four["x"]] = 1;
 
 			self.min = min(one["y"], two["y"], three["y"], four["y"]);
+
+			if(self.min == 0):
+				self.block.gplay.lost();
 
 			self.row[one["y"]] = self.row[one["y"]] + 1;
 			self.row[two["y"]] = self.row[two["y"]] + 1;
@@ -234,21 +287,25 @@ class Board:
 
 			print(self.row[one["y"]], self.row[two["y"]], self.row[three["y"]], self.row[four["y"]])
 
-			if self.row[one["y"]] == 20:
+			if self.row[one["y"]] == Resources.board_width:
 				print("RowFull");
 
+				self.block.gplay.add_row_score();
 				self.delete_row(one["y"]);
-			if self.row[two["y"]] == 20:
+			if self.row[two["y"]] == Resources.board_width:
 				print("RowFull");
 
+				self.block.gplay.add_row_score();
 				self.delete_row(two["y"]);
-			if self.row[three["y"]] == 20:
+			if self.row[three["y"]] == Resources.board_width:
 				print("RowFull");
 
+				self.block.gplay.add_row_score();
 				self.delete_row(three["y"]);
-			if self.row[four["y"]] == 20:
+			if self.row[four["y"]] == Resources.board_width:
 				print("RowFull");
 
+				self.block.gplay.add_row_score();
 				self.delete_row(four["y"]);
 
 			return True;
@@ -263,8 +320,9 @@ class Block(pygame.sprite.Sprite):
 	def move_to_bottom(self, screen, board, blocksprite):
 
 		while(self.move_down(screen, board, blocksprite) == True):
+			pygame.time.delay(1);
 			blocksprite.draw(screen);
-
+			
 	def move_down(self, screen, board, blocksprite):
 		obj_collided = board.check_down();
 
@@ -318,7 +376,7 @@ class Block(pygame.sprite.Sprite):
 
 				self.is_vertical = True;
 
-			self.image, new_rect = Resources.load_image(image);
+			self.image, new_rect = Resources.get_image(image);
 			self.image = pygame.transform.scale(self.image, scale);
 			new_rect = self.image.get_rect();
 
@@ -331,80 +389,108 @@ class Block(pygame.sprite.Sprite):
 
 class BlockZ(Block):
 
-	def __init__(self):
+	def __init__(self, gplay):
 		Block.__init__(self);
+
+		self.gplay = gplay;
+		gplay.add_block_score();
+
+		x_offset = math.floor(Resources.board_width/2);
 
 		self.is_vertical = True;
 		self.block_type = "Z";
 
-		self.one = {"x":0, "y":0};
-		self.two = {"x":0, "y":1};
-		self.three = {"x":1, "y":1};
-		self.four = {"x":1, "y":2};
+		self.one = {"x": x_offset + 0, "y":0};
+		self.two = {"x": x_offset + 0, "y":1};
+		self.three = {"x": x_offset + 1, "y":1};
+		self.four = {"x": x_offset + 1, "y":2};
 
-		self.image, self.rect = Resources.load_image("block-Z.png");
+		self.image, self.rect = Resources.get_image("block-Z.png");
 		self.image = pygame.transform.scale(self.image, (60, 90));
 		self.rect = self.image.get_rect();
+
+		self.rect.centerx = self.rect.centerx + 30*x_offset;
 
 		self.x_scale = 60;
 		self.y_scale = 90;
 
 class BlockI(Block):
 
-	def __init__(self):
+	def __init__(self, gplay):
 		Block.__init__(self);
+
+		self.gplay = gplay;
+		gplay.add_block_score();
+
+		x_offset = math.floor(Resources.board_width/2);
 
 		self.is_vertical = True;
 		self.block_type = "I";
 
-		self.one = {"x":0, "y":0};
-		self.two = {"x":0, "y":1};
-		self.three = {"x":0, "y":2};
-		self.four = {"x":0, "y":3};
+		self.one = {"x": x_offset + 0, "y":0};
+		self.two = {"x": x_offset + 0, "y":1};
+		self.three = {"x": x_offset + 0, "y":2};
+		self.four = {"x": x_offset + 0, "y":3};
 
-		self.image, self.rect = Resources.load_image("block-I.png");
+		self.image, self.rect = Resources.get_image("block-I.png");
 		self.image = pygame.transform.scale(self.image, (30, 120));
 		self.rect = self.image.get_rect();
+
+		self.rect.centerx = self.rect.centerx + 30*x_offset;
 
 		self.x_scale = 30;
 		self.y_scale = 120;
 
 class BlockO(Block):
 
-	def __init__(self):
+	def __init__(self, gplay):
 		Block.__init__(self);
+
+		self.gplay = gplay;
+		gplay.add_block_score();
+
+		x_offset = math.floor(Resources.board_width/2);
 
 		self.is_vertical = True;
 		self.block_type = "O";
 
-		self.one = {"x":0, "y":0};
-		self.two = {"x":0, "y":1};
-		self.three = {"x":1, "y":0};
-		self.four = {"x":1, "y":1};
+		self.one = {"x": x_offset + 0, "y":0};
+		self.two = {"x": x_offset + 0, "y":1};
+		self.three = {"x": x_offset + 1, "y":0};
+		self.four = {"x": x_offset + 1, "y":1};
 
-		self.image, self.rect = Resources.load_image("block-O.png");
+		self.image, self.rect = Resources.get_image("block-O.png");
 		self.image = pygame.transform.scale(self.image, (60, 60));
 		self.rect = self.image.get_rect();
+
+		self.rect.centerx = self.rect.centerx + 30*x_offset;
 
 		self.x_scale = 60;
 		self.y_scale = 60;
 
 class BlockL(Block):
 
-	def __init__(self):
+	def __init__(self, gplay):
 		Block.__init__(self);
+
+		self.gplay = gplay;
+		gplay.add_block_score();
+
+		x_offset = math.floor(Resources.board_width/2);
 
 		self.is_vertical = 1;
 		self.block_type = "L";
 
-		self.one = {"x":1, "y":0};
-		self.two = {"x":1, "y":1};
-		self.three = {"x":1, "y":2};
-		self.four = {"x":0, "y":2};
+		self.one = {"x": x_offset + 1, "y":0};
+		self.two = {"x": x_offset + 1, "y":1};
+		self.three = {"x": x_offset + 1, "y":2};
+		self.four = {"x": x_offset + 0, "y":2};
 
-		self.image, self.rect = Resources.load_image("block-L.png");
+		self.image, self.rect = Resources.get_image("block-L.png");
 		self.image = pygame.transform.scale(self.image, (60, 90));
 		self.rect = self.image.get_rect();
+
+		self.rect.centerx = self.rect.centerx + 30*x_offset;
 
 		self.x_scale = 60;
 		self.y_scale = 90;
@@ -439,7 +525,7 @@ class BlockL(Block):
 
 				self.is_vertical = 1;
 
-			self.image, new_rect = Resources.load_image(image);
+			self.image, new_rect = Resources.get_image(image);
 			self.image = pygame.transform.scale(self.image, scale);
 			new_rect = self.image.get_rect();
 
@@ -450,17 +536,58 @@ class BlockL(Block):
 
 			blocksprite.clear(screen, board.background);
 
+class Gameplay:
+
+	def __init__(self, screen):
+		self.score = 0;
+		self.screen = screen;
+		self.did_lose = False;
+		self.update_screen_text();
+
+	def add_block_score(self):
+		self.score = self.score + 10;
+
+	def add_row_score(self):
+		self.score = self.score + 100;
+
+	def update_screen_text(self):
+		self.font = pygame.font.Font(None, 36);
+
+		self.text = self.font.render("Score : "+str(self.score), True, (255, 255, 255));
+		self.textpos = self.text.get_rect();
+		self.textpos.x = (Resources.board_width)*30 - 150;
+		self.textpos.y = (Resources.board_width)*30 + 30;
+
+		self.screen.fill((166, 87, 50), self.textpos);
+		self.screen.blit(self.text, self.textpos);
+
+	def lost(self):
+		self.did_lose = True;
+
+		gfont = pygame.font.Font(None, 50);
+
+		gover = gfont.render("Game Over!", True, (1, 1, 1));
+		goverpos = gover.get_rect();
+		goverpos.centerx = int(30*Resources.board_width/2);
+		goverpos.centery = int(30*Resources.board_height/2);
+
+		self.screen.blit(gover, goverpos);
+
 def main():
 
-	width, height = 30*20, 30*22;
+	width, height = 30*(Resources.board_width), 30*(Resources.board_height);
 
 	pygame.init();
 	screen = pygame.display.set_mode((width, height));
+
 	pygame.display.set_caption("Tetris - Aakash");
 
-	board = Board("ground.png", (255, 255, 255), screen);
+	Resources.init();
 
-	block = Resources.get_block();
+	board = Board("ground.png", (255, 255, 255), screen);
+	gplay = Gameplay(screen);
+
+	block = Resources.get_block(gplay);
 	blocksprite = pygame.sprite.Group(block);
 
 	board.add_block(block);
@@ -475,7 +602,10 @@ def main():
 	collide_group = pygame.sprite.Group(board.ground);
 
 	while(1):
-		clock.tick(40);
+		clock.tick(60);
+
+		if gplay.did_lose == True:
+			break;
 
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
@@ -488,7 +618,7 @@ def main():
 				elif event.key == pygame.K_DOWN:
 					block.move_to_bottom(screen, board, blocksprite);
 
-					block = Resources.get_block();
+					block = Resources.get_block(gplay);
 					board.add_block(block);
 
 					blocksprite = pygame.sprite.Group(block);
@@ -497,9 +627,9 @@ def main():
 				elif event.key == pygame.K_r:
 					block.rotate(screen, board, blocksprite);
 
-		if(frames >= 40):
+		if(frames >= 30):
 			if block.move_down(screen, board, blocksprite) == False:
-				block = BlockI();
+				block = Resources.get_block(gplay);
 				board.add_block(block);
 
 				blocksprite = pygame.sprite.Group(block);
@@ -508,10 +638,18 @@ def main():
 
 		blocksprite.draw(screen);
 		board.groundsprite.draw(screen);
+		gplay.update_screen_text();
 
 		pygame.display.update();
 
 		frames += 1;
+
+	while(1):
+		for event in pygame.event.get():
+			if event.type == pygame.QUIT:
+				sys.exit();
+
+		pygame.display.update();
 
 if __name__ == "__main__":
 	main();
