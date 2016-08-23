@@ -1,4 +1,4 @@
-import pygame, sys, os
+import pygame, sys, os, random
 
 class Resources:
 
@@ -11,6 +11,23 @@ class Resources:
 		image = image.convert_alpha();
 
 		return image, image.get_rect();
+
+	@staticmethod
+	def get_block():
+		r = random.choice((1, 2, 3));
+
+		if r == 1:
+			temp = BlockI();
+			return temp;
+		elif r == 2:
+			temp = BlockZ();
+			return temp;
+		elif r == 3:
+			temp = BlockO();
+			return temp;
+		elif r == 4:
+			temp = BlockL();
+			return temp;
 
 class Ground(pygame.sprite.Sprite):
 
@@ -25,6 +42,7 @@ class Board:
 
 	def __init__(self, ground_image, background_color, screen):
 		self.screen = screen;
+		self.min = 19;
 
 		self.display = [];
 		self.row = [];
@@ -54,19 +72,25 @@ class Board:
 	def add_block(self, block):
 		self.block = block;
 
-	def delete_row(self, row):
+	def delete_row(self, r):
 		zero = [];
 
-		new_surface = pygame.Surface((30*20, 30*(row+1)));
+		new_surface = pygame.Surface((30*20, 30*(r+1)));
 		new_surface.fill(pygame.Color(255, 255, 255, 255));
 
-		del self.display[row];
+		del self.row[r];
+		self.row.insert(0, 0);
+
+		del self.display[r];
 		for i in range(0, 20):
 			zero.append(0);
 
 		self.display.insert(0, zero);
 
-		for i in range(0, 30*(row)):
+		print(self.min);
+
+		for i in range(self.min, 30*(r)+1):
+
 			for j in range(0, 30*20):
 				color = self.screen.get_at((j, i));
 				new_surface.set_at((j, i+30), color);
@@ -201,6 +225,8 @@ class Board:
 			self.display[three["y"]][three["x"]] = 1;
 			self.display[four["y"]][four["x"]] = 1;
 
+			self.min = min(one["y"], two["y"], three["y"], four["y"]);
+
 			self.row[one["y"]] = self.row[one["y"]] + 1;
 			self.row[two["y"]] = self.row[two["y"]] + 1;
 			self.row[three["y"]] = self.row[three["y"]] + 1;
@@ -212,22 +238,18 @@ class Board:
 				print("RowFull");
 
 				self.delete_row(one["y"]);
-				one["y"] = 0;
-			elif self.row[two["y"]] == 20:
+			if self.row[two["y"]] == 20:
 				print("RowFull");
 
 				self.delete_row(two["y"]);
-				two["y"] = 0;
-			elif self.row[three["y"]] == 20:
+			if self.row[three["y"]] == 20:
 				print("RowFull");
 
 				self.delete_row(three["y"]);
-				three["y"] = 0;
-			elif self.row[four["y"]] == 20:
+			if self.row[four["y"]] == 20:
 				print("RowFull");
 
 				self.delete_row(four["y"]);
-				four["y"] = 0;
 
 			return True;
 
@@ -438,7 +460,7 @@ def main():
 
 	board = Board("ground.png", (255, 255, 255), screen);
 
-	block = BlockI();
+	block = Resources.get_block();
 	blocksprite = pygame.sprite.Group(block);
 
 	board.add_block(block);
@@ -466,7 +488,7 @@ def main():
 				elif event.key == pygame.K_DOWN:
 					block.move_to_bottom(screen, board, blocksprite);
 
-					block = BlockI();
+					block = Resources.get_block();
 					board.add_block(block);
 
 					blocksprite = pygame.sprite.Group(block);
