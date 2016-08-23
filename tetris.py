@@ -1,5 +1,7 @@
 import pygame, sys, os, random, math
 
+THRESH = 30;
+
 class BlockGroup(pygame.sprite.Sprite):
 
 	def __init__(self, surf):
@@ -137,8 +139,7 @@ class Board:
 			zero.append(0);
 
 		self.display.insert(0, zero);
-
-		print(self.min);
+		self.min = self.min - 1;
 
 		for i in range(self.min, 30*(r)+1):
 
@@ -279,8 +280,6 @@ class Board:
 
 			return False;
 		else:
-			print("Commit");
-
 			self.display[one["y"]][one["x"]] = 1;
 			self.display[two["y"]][two["x"]] = 1;
 			self.display[three["y"]][three["x"]] = 1;
@@ -289,32 +288,26 @@ class Board:
 			self.min = min(one["y"], two["y"], three["y"], four["y"]);
 
 			if(self.min <= 0):
-				self.block.gplay.lost();
+				self.block.gplay.lost(self.blocksprite);
 
 			self.row[one["y"]] = self.row[one["y"]] + 1;
 			self.row[two["y"]] = self.row[two["y"]] + 1;
 			self.row[three["y"]] = self.row[three["y"]] + 1;
 			self.row[four["y"]] = self.row[four["y"]] + 1;
 
-			print(self.row[one["y"]], self.row[two["y"]], self.row[three["y"]], self.row[four["y"]])
-
 			if self.row[one["y"]] == Resources.board_width:
-				print("RowFull");
 
 				self.block.gplay.add_row_score();
 				self.delete_row(one["y"]);
 			if self.row[two["y"]] == Resources.board_width:
-				print("RowFull");
 
 				self.block.gplay.add_row_score();
 				self.delete_row(two["y"]);
 			if self.row[three["y"]] == Resources.board_width:
-				print("RowFull");
 
 				self.block.gplay.add_row_score();
 				self.delete_row(three["y"]);
 			if self.row[four["y"]] == Resources.board_width:
-				print("RowFull");
 
 				self.block.gplay.add_row_score();
 				self.delete_row(four["y"]);
@@ -324,22 +317,17 @@ class Board:
 class Block(pygame.sprite.Sprite):
 
 	def __init__(self):
-		print("Created");
-
 		pygame.sprite.Sprite.__init__(self);
 
 	def move_to_bottom(self, screen, board, blocksprite):
 
 		while(self.move_down(screen, board, blocksprite) == True):
-			pygame.time.delay(1);
 			blocksprite.draw(screen);
 			
 	def move_down(self, screen, board, blocksprite):
 		obj_collided = board.check_down();
 
 		if obj_collided == True:
-			print("Collision");
-
 			return False;
 		else:
 			self.rect.centery = self.rect.centery + 30;
@@ -351,9 +339,7 @@ class Block(pygame.sprite.Sprite):
 
 		obj_collided = board.check_right();
 
-		if obj_collided == True:
-			print("Collision");
-		else:
+		if obj_collided == False:
 			self.rect.centerx = self.rect.centerx + 30;
 			blocksprite.clear(screen, board.background);
 
@@ -361,18 +347,14 @@ class Block(pygame.sprite.Sprite):
 
 		obj_collided = board.check_left();
 
-		if obj_collided == True:
-			print("Collision");
-		else:
+		if obj_collided == False:
 			self.rect.centerx = self.rect.centerx - 30;
 			blocksprite.clear(screen, board.background);
 
 	def rotate(self, screen, board, blocksprite):
 		obj_collided = board.check_rotate();
 
-		if obj_collided == True:
-			print("Collision");
-		else:
+		if obj_collided == False:
 			image_type = self.block_type;
 			scale = (0, 0);
 
@@ -509,9 +491,7 @@ class BlockL(Block):
 	def rotate(self, screen, board, blocksprite):
 		obj_collided = board.check_rotate();
 
-		if obj_collided == True:
-			print("Collision");
-		else:
+		if obj_collided == False:
 			image_type = self.block_type;
 			scale = (0, 0);
 
@@ -572,7 +552,8 @@ class Gameplay:
 		self.screen.fill((166, 87, 50), self.textpos);
 		self.screen.blit(self.text, self.textpos);
 
-	def lost(self):
+	def lost(self, blocksprite):
+		global block_group_sprite;
 		self.did_lose = True;
 
 		gfont = pygame.font.Font(None, 50);
@@ -582,9 +563,16 @@ class Gameplay:
 		goverpos.centerx = int(30*Resources.board_width/2);
 		goverpos.centery = int(30*Resources.board_height/2);
 
+		block_group_sprite.empty();
+		block_group_sprite.draw(self.screen);
+
+		blocksprite.empty();
+		blocksprite.draw(self.screen);
+
 		self.screen.blit(gover, goverpos);
 
 def main():
+	global THRESH;
 
 	width, height = 30*(Resources.board_width), 30*(Resources.board_height);
 
@@ -623,11 +611,11 @@ def main():
 			if event.type == pygame.QUIT:
 				sys.exit();
 			elif event.type == pygame.KEYDOWN:
-				if event.key == pygame.K_RIGHT:
+				if event.key == pygame.K_d:
 					block.move_right(screen, board, blocksprite);
-				elif event.key == pygame.K_LEFT:
+				elif event.key == pygame.K_a:
 					block.move_left(screen, board, blocksprite);
-				elif event.key == pygame.K_DOWN:
+				elif event.key == pygame.K_SPACE:
 					block.move_to_bottom(screen, board, blocksprite);
 
 					block_group_sprite.draw(screen);
@@ -638,10 +626,10 @@ def main():
 					board.add_block(block, blocksprite);
 
 					frames = 1;
-				elif event.key == pygame.K_r:
+				elif event.key == pygame.K_s:
 					block.rotate(screen, board, blocksprite);
 
-		if(frames >= 30):
+		if(frames >= THRESH):
 			if block.move_down(screen, board, blocksprite) == False:
 				block = Resources.get_block(gplay);
 				blocksprite.add(block);
@@ -659,6 +647,13 @@ def main():
 		pygame.display.update();
 
 		frames += 1;
+
+		if(gplay.score >= 500):
+			THRESH = 10;
+		elif(gplay.score >= 100):
+			THRESH = 20;
+		elif(gplay.score >= 1000):
+			THRESH = 5;
 
 	while(1):
 		for event in pygame.event.get():
