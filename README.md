@@ -1,2 +1,2 @@
 # python-game
-IIIT Hyderabad SSAD assignment
+A tetris clone in python
