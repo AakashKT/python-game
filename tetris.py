@@ -1,3 +1,17 @@
+"""
+
+Name : Aakash K.T.
+20161202
+
+If possible, compile using python3
+This game was made and tested keeping python3 in mind.
+
+Should also work with python2.7
+
+
+"""
+
+
 import pygame, sys, os, random, math
 
 THRESH = 30;
