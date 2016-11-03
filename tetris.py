@@ -337,7 +337,7 @@ class Block(pygame.sprite.Sprite):
 
 		while(self.move_down(screen, board, blocksprite) == True):
 			blocksprite.draw(screen);
-			
+
 	def move_down(self, screen, board, blocksprite):
 		obj_collided = board.check_down();
 
@@ -625,11 +625,11 @@ def main():
 			if event.type == pygame.QUIT:
 				sys.exit();
 			elif event.type == pygame.KEYDOWN:
-				if event.key == pygame.K_d:
+				if event.key == pygame.K_RIGHT:
 					block.move_right(screen, board, blocksprite);
-				elif event.key == pygame.K_a:
+				elif event.key == pygame.K_LEFT:
 					block.move_left(screen, board, blocksprite);
-				elif event.key == pygame.K_SPACE:
+				elif event.key == pygame.K_DOWN:
 					block.move_to_bottom(screen, board, blocksprite);
 
 					block_group_sprite.draw(screen);
@@ -640,7 +640,7 @@ def main():
 					board.add_block(block, blocksprite);
 
 					frames = 1;
-				elif event.key == pygame.K_s:
+				elif event.key == pygame.K_r:
 					block.rotate(screen, board, blocksprite);
 
 		if(frames >= THRESH):

@@ -1,0 +1,13 @@
+actionid: py27
+msg: getenv
+cmdargs: ['/Users/aakashkt/Desktop/assignments/SSAD/assignment1/python-game/.tox/py27/bin/pip', 'install', 'pygame', 'pytest']
+env: {'rvm_prefix': '/Users/aakashkt', 'IRBRC': '/Users/aakashkt/.rvm/rubies/ruby-2.3.1/.irbrc', 'Apple_PubSub_Socket_Render': '/private/tmp/com.apple.launchd.Fa1muaXuhe/Render', 'PYTHONHASHSEED': '4198193680', 'DYLD_LIBRARY_PATH': '/usr/local/mysql/lib:/usr/local/mysql/lib:', 'TERM_PROGRAM_VERSION': '377', 'LOGNAME': 'aakashkt', 'HOME': '/Users/aakashkt', 'rvm_bin_path': '/Users/aakashkt/.rvm/bin', 'RUBY_VERSION': 'ruby-2.3.1', 'TMPDIR': '/var/folders/7q/xj1ns0293cj4rwmhcjfhf64c0000gn/T/', 'SHELL': '/bin/bash', 'TERM_PROGRAM': 'Apple_Terminal', 'LC_CTYPE': 'UTF-8', 'USER': 'aakashkt', 'OLDPWD': '/Users/aakashkt/Desktop/assignments/SSAD/assignment1', 'MY_RUBY_HOME': '/Users/aakashkt/.rvm/rubies/ruby-2.3.1', '_': '/usr/local/bin/tox', 'VIRTUAL_ENV': '/Users/aakashkt/Desktop/assignments/SSAD/assignment1/python-game/.tox/py27', 'XPC_FLAGS': '0x0', 'XPC_SERVICE_NAME': '0', '__CF_USER_TEXT_ENCODING': '0x1F5:0x0:0x0', 'TERM_SESSION_ID': '3C379EC6-BDC9-4C2E-A097-50DC815B92E8', 'PATH': '/Users/aakashkt/Desktop/assignments/SSAD/assignment1/python-game/.tox/py27/bin:/opt/local/bin:/opt/local/sbin:/usr/local/mysql/bin/mysql:/opt/local/bin:/opt/local/sbin:/Users/aakashkt/.rvm/gems/ruby-2.3.1/bin:/Users/aakashkt/.rvm/gems/ruby-2.3.1@global/bin:/Users/aakashkt/.rvm/rubies/ruby-2.3.1/bin:/Users/aakashkt/.rbenv/shims:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/Users/aakashkt/.rvm/bin::/usr/local/mysql/bin', 'GEM_HOME': '/Users/aakashkt/.rvm/gems/ruby-2.3.1', 'PWD': '/Users/aakashkt/Desktop/assignments/SSAD/assignment1/python-game', '_system_name': 'OSX', 'DISPLAY': '/private/tmp/com.apple.launchd.EOIzIpVWhx/org.macosforge.xquartz:0', 'SSH_AUTH_SOCK': '/private/tmp/com.apple.launchd.gC92SYzOmM/Listeners', 'rvm_version': '1.27.0 (latest)', '_system_arch': 'x86_64', 'rvm_path': '/Users/aakashkt/.rvm', '_system_version': '10.12', '_system_type': 'Darwin', 'RBENV_SHELL': 'bash', 'SHLVL': '1', 'TERM': 'xterm-256color', 'GEM_PATH': '/Users/aakashkt/.rvm/gems/ruby-2.3.1:/Users/aakashkt/.rvm/gems/ruby-2.3.1@global'}
+
+Collecting pygame
+  Using cached pygame-1.9.2b6-cp27-cp27m-macosx_10_9_x86_64.whl
+Collecting pytest
+  Using cached pytest-3.0.3-py2.py3-none-any.whl
+Collecting py>=1.4.29 (from pytest)
+  Using cached py-1.4.31-py2.py3-none-any.whl
+Installing collected packages: pygame, py, pytest
+Successfully installed py-1.4.31 pygame-1.9.2b6 pytest-3.0.3
